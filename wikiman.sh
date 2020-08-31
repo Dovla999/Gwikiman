@@ -374,6 +374,40 @@ picker_tui() {
 
 }
 
+picker_gui(){
+
+	#if [ "$(echo "$conf_man_lang" | wc -w)" = '1' ] && [ "$(echo "$conf_wiki_lang" | wc -w)" = '1' ]; then
+	#	columns='Name'
+	#else
+    #	columns='Name Language'
+	#fi
+
+
+
+
+
+	select="$(echo "$all_results" | sed 's/\tman/\tman\t /g' | sed 's/\t/\n/g' |				  
+				 yad --title="Wikiman" --field="Search by Name" --list --width=600 --height=800 --text="Query results" \
+				--column="Name" --column="Language" --column="Type" --column="Path":HD --separator='\t' |awk -F '\t' \
+					"{
+						if ( \"\$3\" == \"man\") {
+							sec=\$1
+							gsub(/.*\(/,\"\",sec);
+							gsub(/\).*$/,\"\",sec);
+							gsub(/ .*$/,\"\",\$1);
+							printf(\"man -S %s -L %s %s\n\",sec,\$2,\$1);
+					} else if ( \$3 == \"archwiki\") {
+						printf(\" firefox '%s'\n\",\$4);
+						}
+					};"
+			)"
+	eval "$select"
+
+	
+
+	
+}
+
 help() {
 
 	echo "Usage: wikiman [OPTION]... [KEYWORD]...
@@ -446,8 +480,12 @@ fi
 
 combine_results
 
-if echo "$all_results" | grep -cve '^\s*$' >/dev/null; then
-	picker_tui && eval "$command"
-else
-	echo "search: no results for '$*'" 1>&2
-fi
+#echo "$all_results"
+
+picker_gui
+
+#if echo "$all_results" | grep -cve '^\s*$' >/dev/null; then
+#	picker_tui && eval "$command"
+#else
+#	echo "search: no results for '$*'" 1>&2
+#fi
