@@ -382,30 +382,27 @@ picker_gui(){
     #	columns='Name Language'
 	#fi
 
-
-
-
-
 	select="$(echo "$all_results" | sed 's/\tman/\tman\t /g' | sed 's/\t/\n/g' |				  
 				 yad --title="Wikiman" --field="Search by Name" --list --width=600 --height=800 --text="Query results" \
 				--column="Name" --column="Language" --column="Type" --column="Path":HD --separator='\t' |awk -F '\t' \
 					"{
-						if ( \"\$3\" == \"man\") {
+						if ( \$3 == \"man\") {
 							sec=\$1
 							gsub(/.*\(/,\"\",sec);
 							gsub(/\).*$/,\"\",sec);
 							gsub(/ .*$/,\"\",\$1);
-							printf(\"man -S %s -L %s %s\n\",sec,\$2,\$1);
-					} else if ( \$3 == \"archwiki\") {
-						printf(\" firefox '%s'\n\",\$4);
+							printf(\"man --html=surf -S %s -L %s %s\n\",sec,\$2,\$1);
+						} else if ( \$3 == \"archwiki\") {
+							printf(\"surf '%s'\n\",\$4);
+						}
+						else {
+							printf(\"\");
 						}
 					};"
 			)"
-	eval "$select"
-
-	
-
-	
+	if  [ "$select" ]; then
+		 eval "$select" & picker_gui 
+	fi
 }
 
 help() {
